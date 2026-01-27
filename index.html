@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Anotador de Juegos</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .game-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .game-btn {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .game-btn.active {
+            background: linear-gradient(45deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        
+        .game-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .players-section {
+            margin-bottom: 20px;
+        }
+        
+        .add-player {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .add-player input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .add-player input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .add-player button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .player-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .player-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .score-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .score-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .score-btn.minus {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+        
+        .score-btn.plus {
+            background: rgba(0,255,136,0.2);
+            color: #00ff88;
+        }
+        
+        .score-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn.reset {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+        }
+        
+        .action-btn.history {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .winner-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .winner-banner.show {
+            display: flex;
+        }
+        
+        .winner-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .winner-banner .winner-name {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+        }
+        
+        .winner-banner button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .empty-state span {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 20px;
+        }
+        
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+                color: #1a1a2e;
+            }
+            .player-card {
+                background: rgba(255,255,255,0.8);
+                border-color: rgba(0,0,0,0.1);
+            }
+            .add-player input, .game-btn {
+                background: rgba(0,0,0,0.05);
+                color: #1a1a2e;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Anotador de Juegos</h1>
+    </div>
+    
+    <div class="game-select">
+        <button class="game-btn active" data-game="libre" data-target="0">Libre</button>
+        <button class="game-btn" data-game="truco" data-target="30">Truco (30)</button>
+        <button class="game-btn" data-game="chinchon" data-target="100">Chinchón</button>
+        <button class="game-btn" data-game="uno" data-target="500">UNO</button>
+        <button class="game-btn" data-game="escoba" data-target="15">Escoba</button>
+        <button class="game-btn" data-game="generala" data-target="0">Generala</button>
+    </div>
+    
+    <div class="players-section">
+        <div class="add-player">
+            <input type="text" id="playerName" placeholder="Nombre del jugador" maxlength="20">
+            <button onclick="addPlayer()">+ Agregar</button>
+        </div>
+        
+        <div id="playersList">
+            <div class="empty-state">
+                <span>👥</span>
+                <p>Agregá jugadores para empezar</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-bar">
+        <button class="action-btn reset" onclick="resetScores()">🔄 Reiniciar</button>
+        <button class="action-btn history" onclick="newGame()">🆕 Nueva partida</button>
+    </div>
+    
+    <div class="winner-banner" id="winnerBanner">
+        <h2>🏆 ¡Ganador!</h2>
+        <div class="winner-name" id="winnerName"></div>
+        <button onclick="closeWinner()">Continuar</button>
+    </div>
+
+    <script>
+        let players = JSON.parse(localStorage.getItem('anotador_players') || '[]');
+        let currentGame = localStorage.getItem('anotador_game') || 'libre';
+        let targetScore = parseInt(localStorage.getItem('anotador_target') || '0');
+        
+        function save() {
+            localStorage.setItem('anotador_players', JSON.stringify(players));
+            localStorage.setItem('anotador_game', currentGame);
+            localStorage.setItem('anotador_target', targetScore);
+        }
+        
+        function render() {
+            const list = document.getElementById('playersList');
+            
+            if (players.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span>👥</span>
+                        <p>Agregá jugadores para empezar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = players.map((p, i) => `
+                <div class="player-card">
+                    <div class="player-header">
+                        <span class="player-name">${p.name}</span>
+                        <button class="delete-btn" onclick="removePlayer(${i})">×</button>
+                    </div>
+                    <div class="player-score">${p.score}</div>
+                    <div class="score-controls">
+                        <button class="score-btn minus" onclick="changeScore(${i}, -10)">-10</button>
+                        <button class="score-btn minus" onclick="changeScore(${i}, -1)">-1</button>
+                        <button class="score-btn plus" onclick="changeScore(${i}, 1)">+1</button>
+                        <button class="score-btn plus" onclick="changeScore(${i}, 5)">+5</button>
+                        <button class="score-btn plus" onclick="changeScore(${i}, 10)">+10</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addPlayer() {
+            const input = document.getElementById('playerName');
+            const name = input.value.trim();
+            if (name) {
+                players.push({ name, score: 0 });
+                input.value = '';
+                save();
+                render();
+            }
+        }
+        
+        function removePlayer(index) {
+            if (confirm(`¿Eliminar a ${players[index].name}?`)) {
+                players.splice(index, 1);
+                save();
+                render();
+            }
+        }
+        
+        function changeScore(index, delta) {
+            players[index].score += delta;
+            save();
+            render();
+            checkWinner();
+        }
+        
+        function checkWinner() {
+            if (targetScore <= 0) return;
+            
+            const winner = players.find(p => p.score >= targetScore);
+            if (winner) {
+                document.getElementById('winnerName').textContent = winner.name;
+                document.getElementById('winnerBanner').classList.add('show');
+            }
+        }
+        
+        function closeWinner() {
+            document.getElementById('winnerBanner').classList.remove('show');
+        }
+        
+        function resetScores() {
+            if (confirm('¿Reiniciar todos los puntajes a 0?')) {
+                players.forEach(p => p.score = 0);
+                save();
+                render();
+            }
+        }
+        
+        function newGame() {
+            if (confirm('¿Empezar nueva partida? Se borrarán todos los jugadores.')) {
+                players = [];
+                save();
+                render();
+            }
+        }
+        
+        function selectGame(btn) {
+            document.querySelectorAll('.game-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentGame = btn.dataset.game;
+            targetScore = parseInt(btn.dataset.target);
+            save();
+        }
+        
+        // Event listeners
+        document.querySelectorAll('.game-btn').forEach(btn => {
+            btn.addEventListener('click', () => selectGame(btn));
+            if (btn.dataset.game === currentGame) {
+                btn.classList.add('active');
+                targetScore = parseInt(btn.dataset.target);
+            }
+        });
+        
+        document.getElementById('playerName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addPlayer();
+        });
+        
+        // Initial render
+        render();
+        
+        // PWA install
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
